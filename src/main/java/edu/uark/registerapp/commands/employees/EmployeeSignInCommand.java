@@ -25,31 +25,35 @@ public class EmployeeSignInCommand implements ResultCommandInterface<Employee> {
 	@Override
 	public Employee execute() {
 		this.validateProperties();
-
 		return new Employee(this.SignInEmployee());
 	}
 
 	// Helper methods
 	private void validateProperties() {
+		//check if employeeID is blank
 		if (StringUtils.isBlank(this.employeeSignIn.getEmployeeId())) {
 			throw new UnprocessableEntityException("employee ID");
 		}
+		//check if you can get only a number out of the ID
 		try {
 			Integer.parseInt(this.employeeSignIn.getEmployeeId());
 		} catch (final NumberFormatException e) {
+			//throw an exception if the ID is not just numbers
 			throw new UnprocessableEntityException("employee ID");
 		}
 		if (StringUtils.isBlank(this.employeeSignIn.getPassword())) {
+			//throw exception if the password is blank
 			throw new UnprocessableEntityException("password");
 		}
 	}
 
 	@Transactional
 	private EmployeeEntity SignInEmployee() {
+		//tries to find existing employee using the id
 		final Optional<EmployeeEntity> employeeEntity =
 			this.employeeRepository.findByEmployeeId(
 				Integer.parseInt(this.employeeSignIn.getEmployeeId()));
-
+		//verifies ifthe employee exists
 		if (!employeeEntity.isPresent()
 			|| !Arrays.equals(
 				employeeEntity.get().getPassword(),
